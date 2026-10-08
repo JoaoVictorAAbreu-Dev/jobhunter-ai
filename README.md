@@ -55,3 +55,21 @@ APIs: https://developers.greenhouse.io/job-board.html e https://github.com/lever
 - **Greenhouse/Lever:** continuam disponíveis; configure identificadores reais de empresas nos arrays de `config.json`.
 
 A coleta roda no GitHub Actions e gera `vagas.json` no site; o TypeScript apenas exibe os resultados. Erros de coleta ficam no artefato `avisos_busca.txt`. Nenhuma fonte garante vagas elegíveis e nenhuma candidatura é enviada automaticamente.
+
+## API PHP opcional (backend local / hospedagem PHP)
+
+O endpoint `php/api/vagas.php` fornece uma API REST de **somente leitura**, sem expor credenciais, currículos ou decisões de candidatura. Ele lê `site/vagas.json`, que é gerado pelo Python; **não busca vagas diretamente nas APIs externas**. Não substitui a rotina do GitHub Actions.
+
+Pré-requisito: PHP 8.1+ (usa `array_is_list`), Python 3 e `site/vagas.json` gerado. Na raiz do repositório:
+
+```bash
+python3 job_hunter.py buscar
+python3 scripts/build_site.py
+php -S localhost:8000 -t .
+# Em outro terminal:
+curl 'http://localhost:8000/php/api/vagas.php?q=python&nivel=junior&pagina=1&limite=12'
+```
+
+Parâmetros opcionais: `q` (texto), `nivel`, `area`, `modalidade`, `local`, `empresa`, `ordem` (`pontuacao`, `empresa`, `titulo`), `pagina` e `limite` (1–100). Resposta JSON: `total`, `pagina`, `limite`, `paginas`, `vagas`. Parâmetros inválidos recebem HTTP 400; dados ausentes, HTTP 503. Os filtros são combinados e a paginação é feita no servidor.
+
+**Hospedagem:** GitHub Pages é estático e **não executa PHP**. O painel atual continua consumindo `site/vagas.json` e funcionando no Pages. Para consumir a API PHP em produção, hospede o backend em um servidor com PHP e configure a URL do frontend; não publique segredos nesse servidor ou no JSON público.
