@@ -1,5 +1,7 @@
 name: Buscar vagas e publicar painel
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: '23 11 * * *'
@@ -13,6 +15,9 @@ concurrency:
 jobs:
   search:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,6 +43,3 @@ jobs:
           path: site
       - uses: actions/deploy-pages@v4
         id: deployment
-        environment:
-          name: github-pages
-          url: ${{ steps.deployment.outputs.page_url }}
