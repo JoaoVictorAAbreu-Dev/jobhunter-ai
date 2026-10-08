@@ -1,8 +1,25 @@
 {
   "greenhouse": [],
   "lever": [],
-  "niveis": ["estagio", "junior"],
+  "niveis": [
+    "estagio",
+    "junior"
+  ],
   "regiao": "São Paulo, região metropolitana e remoto",
   "aprovacao_obrigatoria": true,
-  "envio_automatico": false
+  "envio_automatico": false,
+  "remotive": {
+    "enabled": true,
+    "limit": 100
+  },
+  "adzuna": {
+    "enabled": false,
+    "where": "São Paulo",
+    "results_per_page": 30,
+    "queries": [
+      "estágio tecnologia",
+      "desenvolvedor junior",
+      "analista de dados junior"
+    ]
+  }
 }
