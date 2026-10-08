@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.aprovacoes.json
+aprovacoes.json
+site/

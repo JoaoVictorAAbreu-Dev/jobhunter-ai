@@ -1,0 +1,8 @@
+{
+  "greenhouse": [],
+  "lever": [],
+  "niveis": ["estagio", "junior"],
+  "regiao": "São Paulo, região metropolitana e remoto",
+  "aprovacao_obrigatoria": true,
+  "envio_automatico": false
+}
