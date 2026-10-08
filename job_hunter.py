@@ -4,11 +4,12 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 BASE = Path(__file__).resolve().parent
@@ -61,6 +62,41 @@ def collect(config, loader=fetch):
                 jobs.append(dict(id=f'lever:{board}:{j.get("id")}', empresa=board, titulo=j.get('text', ''), local=cat.get('location', ''), descricao=j.get('descriptionPlain') or '', url=j.get('hostedUrl', '')))
         except Exception as exc:
             errors.append(f'Lever {board}: {exc}')
+    # Remotive: API pública de vagas remotas; não presumir elegibilidade no Brasil.
+    if config.get('remotive', {}).get('enabled', False):
+        try:
+            params = {'category': 'software-dev', 'limit': str(config.get('remotive', {}).get('limit', 100))}
+            data = loader('https://remotive.com/api/remote-jobs?' + urlencode(params))
+            for j in data.get('jobs', []):
+                candidate = j.get('candidate_required_location') or ''
+                region = norm(candidate)
+                # Global / Worldwide e Brasil explicitamente aceitos; demais regiões não são inferidas.
+                if not (has_any(region, ['worldwide', 'anywhere', 'global', 'brazil', 'brasil']) or not region):
+                    continue
+                if not region:
+                    continue
+                jobs.append(dict(id='remotive:' + str(j.get('id')), empresa=j.get('company_name', ''), titulo=j.get('title', ''), local='Remoto — ' + candidate, descricao=html.unescape(re.sub('<[^>]*>', ' ', j.get('description') or '')), url=j.get('url', '')))
+        except Exception as exc:
+            errors.append(f'Remotive: {exc}')
+    # Adzuna: somente quando credenciais estiverem presentes em secrets/ambiente.
+    if config.get('adzuna', {}).get('enabled', False):
+        app_id, app_key = os.environ.get('ADZUNA_APP_ID'), os.environ.get('ADZUNA_APP_KEY')
+        if not (app_id and app_key):
+            errors.append('Adzuna: configure ADZUNA_APP_ID e ADZUNA_APP_KEY nos secrets do GitHub Actions.')
+        else:
+            settings = config['adzuna']
+            for term in settings.get('queries', ['junior developer', 'estagio tecnologia']):
+                try:
+                    params = {'app_id': app_id, 'app_key': app_key, 'results_per_page': settings.get('results_per_page', 30), 'what': term, 'where': settings.get('where', 'São Paulo')}
+                    url = 'https://api.adzuna.com/v1/api/jobs/br/search/1?' + urlencode(params)
+                    data = loader(url)
+                    for j in data.get('results', []):
+                        location = j.get('location') or {}
+                        loc = location.get('display_name') or ', '.join(location.get('area', []))
+                        jobs.append(dict(id='adzuna:' + str(j.get('id')), empresa=(j.get('company') or {}).get('display_name', ''), titulo=j.get('title', ''), local=loc, descricao=html.unescape(re.sub('<[^>]*>', ' ', j.get('description') or '')), url=j.get('redirect_url', '')))
+                except Exception as exc:
+                    # Evitar colocar URL com app_key em logs e avisos.
+                    errors.append(f'Adzuna ({term}): falha na consulta ({type(exc).__name__}). Verifique credenciais, país e limites da API.')
     return jobs, errors
 
 def classify(job, config):
