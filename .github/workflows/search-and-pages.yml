@@ -27,6 +27,10 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Buscar vagas
         run: python job_hunter.py buscar
+      - name: Compilar frontend TypeScript
+        run: |
+          npm install --no-save typescript@5.9.3
+          npx tsc --project web/tsconfig.json
       - name: Gerar painel público
         run: python scripts/build_site.py
       - name: Salvar CSV privado como artefato
