@@ -13,7 +13,7 @@
     "limit": 100
   },
   "adzuna": {
-    "enabled": false,
+    "enabled": true,
     "where": "São Paulo",
     "results_per_page": 30,
     "queries": [
