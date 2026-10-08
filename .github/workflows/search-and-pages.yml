@@ -26,6 +26,9 @@ jobs:
       - name: Executar testes
         run: python -m unittest discover -s tests -v
       - name: Buscar vagas
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
         run: python job_hunter.py buscar
       - name: Compilar frontend TypeScript
         run: |
