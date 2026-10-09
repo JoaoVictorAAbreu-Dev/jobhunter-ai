@@ -7,8 +7,6 @@ services:
       ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
       ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
       RUN_COLLECTION: ${RUN_COLLECTION:-0}
-    volumes:
-      - jobhunter_data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/') === false ? 1 : 0);"]
@@ -16,6 +14,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-
-volumes:
-  jobhunter_data:
