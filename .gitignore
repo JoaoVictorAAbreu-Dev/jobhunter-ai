@@ -3,3 +3,7 @@ __pycache__/
 .aprovacoes.json
 aprovacoes.json
 site/
+
+.env
+.env.*
+!.env.example
