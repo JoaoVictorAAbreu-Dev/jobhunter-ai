@@ -73,3 +73,33 @@ curl 'http://localhost:8000/php/api/vagas.php?q=python&nivel=junior&pagina=1&lim
 Parâmetros opcionais: `q` (texto), `nivel`, `area`, `modalidade`, `local`, `empresa`, `ordem` (`pontuacao`, `empresa`, `titulo`), `pagina` e `limite` (1–100). Resposta JSON: `total`, `pagina`, `limite`, `paginas`, `vagas`. Parâmetros inválidos recebem HTTP 400; dados ausentes, HTTP 503. Os filtros são combinados e a paginação é feita no servidor.
 
 **Hospedagem:** GitHub Pages é estático e **não executa PHP**. O painel atual continua consumindo `site/vagas.json` e funcionando no Pages. Para consumir a API PHP em produção, hospede o backend em um servidor com PHP e configure a URL do frontend; não publique segredos nesse servidor ou no JSON público.
+
+## Docker (Ubuntu / Windows / macOS)
+
+Pré-requisito: Docker Engine com Compose v2 ou Docker Desktop. O contêiner usa **PHP 8.3** para servir o painel e a API, **Python 3** para coletar as vagas e **Node 22** apenas na etapa de compilação do TypeScript.
+
+```bash
+git clone https://github.com/JoaoVictorAAbreu-Dev/jobhunter-ai.git
+cd jobhunter-ai
+cp .env.example .env
+docker compose up --build -d
+```
+
+Acesse **http://localhost:8080/** para o painel e **http://localhost:8080/api/vagas?pagina=1&limite=12** para a API PHP. A imagem gera o JSON inicial mesmo sem vagas; não é necessário ter credenciais para abrir o painel.
+
+Para buscar vagas manualmente e atualizar a página, com o contêiner em execução:
+
+```bash
+docker compose exec jobhunter sh -c 'python3 job_hunter.py buscar && python3 scripts/build_site.py'
+```
+
+Para coletar automaticamente **uma vez na inicialização**, configure `RUN_COLLECTION=1` no arquivo `.env` e execute `docker compose up -d --force-recreate`. Isso não agenda coletas periódicas. Se a coleta falhar, o painel ainda sobe, com o último conjunto de dados disponível no contêiner.
+
+Para habilitar a Adzuna, defina `ADZUNA_APP_ID` e `ADZUNA_APP_KEY` no **arquivo local** `.env`, usando uma chave nova e privada. O `.env` está no `.gitignore` e no `.dockerignore`; **nunca** envie credenciais ao repositório. A disponibilidade da API Adzuna para `br` ainda depende da conta e do endpoint.
+
+```bash
+docker compose logs -f jobhunter
+docker compose down
+```
+
+O contêiner **não envia candidaturas**. Dados coletados dentro do contêiner são efêmeros e podem desaparecer ao recriá-lo; exporte o CSV se precisar mantê-lo. Para disponibilizar na internet, implante em um servidor com Docker, DNS/HTTPS e portas configuradas; `localhost:8080` é apenas acesso local. O GitHub Pages continua sendo uma publicação separada, sem execução de PHP.
