@@ -1,4 +1,40 @@
-# JobHunter AI v2 — São Paulo e remoto
+# JobHunter AI — plataforma de descoberta de vagas
+
+Projeto de portfólio em **Engenharia de Software** para agregar anúncios públicos de estágio e júnior em tecnologia, com classificação por regras, painel web, API PHP opcional, Docker e CI/CD. Não realiza candidaturas automáticas.
+
+## Visão geral das stacks
+
+| Camada | Stack | Diretório / arquivo |
+|---|---|---|
+| Coleta e regras de negócio | Python 3 | `job_hunter.py` |
+| Geração de dados públicos | Python 3 | `scripts/build_site.py` |
+| Interface web | HTML, CSS, TypeScript | `web/` |
+| API REST opcional | PHP 8.3 | `php/api/` |
+| Execução local | Docker / Compose | `Dockerfile`, `compose.yaml`, `docker/` |
+| Testes e deploy | GitHub Actions | `.github/workflows/` |
+| Publicação estática | GitHub Pages | `site/` (gerado) |
+
+## Documentação de engenharia
+
+- [Arquitetura e decisões técnicas](docs/ARCHITECTURE.md)
+- [Requisitos e critérios de aceite](docs/REQUIREMENTS.md)
+- [Contrato da API PHP](docs/API.md)
+- [Desenvolvimento, qualidade e contribuição](docs/DEVELOPMENT.md)
+
+## Início rápido com Docker
+
+```bash
+git clone https://github.com/JoaoVictorAAbreu-Dev/jobhunter-ai.git
+cd jobhunter-ai
+cp .env.example .env
+docker compose up --build -d
+```
+
+Acesse http://localhost:8080 para o painel e http://localhost:8080/api/vagas para a API. Para buscar vagas, consulte a seção Docker abaixo.
+
+---
+
+## Guia detalhado — São Paulo e remoto
 
 Mini-projeto Python 3 (sem dependências externas) para localizar vagas de **estágio e júnior** nas páginas públicas de empresas que utilizam **Greenhouse** ou **Lever**, priorizar por área técnica e indicar um dos nove currículos em PDF.
 
