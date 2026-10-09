@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+__pycache__
+*.pyc
+.env
+.env.*
+!.env.example
+site
+vagas_para_revisar.csv
+avisos_busca.txt
+aprovacoes.json
+*.pdf
+*.tex
